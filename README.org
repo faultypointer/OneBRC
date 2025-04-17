@@ -57,8 +57,85 @@ let (station_name, temp) = line.split_once(';').unwrap();
 #+end_src
 
 So collecting the vector and stuff added to the time.
+
+** Fourth Attempt: BTreeMap instead of HashMap
+see commit: [[https://github.com/faultypointer/OneBRC/commit/6a7468beb751cc3bf8bb873a5ad2c03e7df21a30][6a7468b]]
+I dont have much to say for this one. (also I seem to have already done the commit for code without writing here). I just used BTreeMap instead of HashMap. Since BTreeMap is sorted on keys
+I didn't need to collect to a vector and sort. And also I literally just needed to change HashMap to BTreeMap for it to work. (and removing the part where i collect to vector and sort)
+
+
+** Fifth Attempt: multithreaded solution
+see commit:
+*** Time
+- 50 Million rows:  0.592 seconds
+- Billon rows: 13.162 seconds
+  Okay. Lets goo!! Finally below the 100 seconds. and what a jump
+
+*** Explanation
+The program is almost entirely cpu bound.
+```
+real: 0m16.420s
+user: 3m47.764s
+sys: 0m15.085s
+```
+
+se- wait what. I'm sure It was not like that before. (also 13.1s jumped to 16.4 but thats not much of a problem for now)
+
+Anyway that a problem for a future attempt.
+So what I did for this is instead of single thread processing all that huge file, I created chunks of those file. The number of chunks based on the number of cpu threads available. Then each thread can make its own `BufReader` and read the lines and perform the necessary calculation and store the thing in `BTreeMap` parallelly. Then after every thread is finished with its chunk, combine the seperate `BTreeMap` into a single `BTreeMap`.
+
+Combining the `BTreeMap` is fairly simple. Create a new map and for each of the maps from the seperate thereads, sum the count and temperature sum for the matching stations and
+find the min and max temperature for min and max.
+
+#+begin_src rust
+let mut final_station_data: StationDataMap = StationDataMap::new();
+    for map in station_data_distributed {
+        for (station, data) in map {
+            final_station_data
+                .entry(station)
+                .and_modify(|existing| {
+                    existing.count += data.count;
+                    existing.sum += data.sum;
+                    existing.min = f64::min(existing.min, data.min);
+                    existing.max = f64::max(existing.max, data.max);
+                })
+                .or_insert(data);
+        }
+    }
+#+end_src
+
+The main problem is that we need to make sure that the start of each chunk is right after the newline character and the end is before the newline character.
+Which is done by this function
+#+begin_src rust
+fn align_newline(file: &mut File, mut pos: u64) -> u64 {
+    file.seek(SeekFrom::Start(pos)).unwrap();
+    let mut buf = [0u8; 1];
+    while let Ok(_) = file.read_exact(&mut buf) {
+        pos += 1;
+        if buf[0] == b'\n' {
+            break;
+        }
+    }
+    pos
+}
+#+end_src
+
+`pos` passed to the function is the approximate end location (or start) of the chunk calculated by multiplying the average chunk size and chunk number. Note that the pos is incremented before breaking out of loop when newline is found. This means that the location of
+byte afte the '\n' is returned. This is exaclty what we want for the start. For end it is also fine because of this check in the processing function
+#+begin_src rust
+ let line = line.unwrap();
+total_bytes += line.len() as u64;
+if total_bytes > end {
+    break;
+}
+#+end_src
+
+
+
 * Resource
 ** Version 1: plain buffer reader + hashmap
 - https://doc.rust-lang.org/stable/std/io/struct.BufReader.html#method.buffer
 - https://doc.rust-lang.org/std/string/struct.String.html#method.split_once [didnt actually get to use split once] [see third attempt]
 - https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.entry
+** Version 4: MultiThreaded
+- https://rpallas.xyz/1brc/ [used rayon instead of std threads used here]

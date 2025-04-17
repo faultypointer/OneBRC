@@ -11,3 +11,4 @@ path = "scripts/create_data.rs"
 debug = true
 
 [dependencies]
+rayon = "1.10.0"
