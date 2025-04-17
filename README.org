@@ -31,7 +31,7 @@ Then for each line read from the buffered reader, I split into station name and 
 And then finally to present the data in sorted manner, collect the hashmap into vector and sort the vector using the keys.
 
 ** Second Attempt: First Attempt + No allocaing New data
-see commit:
+see commit: [[https://github.com/faultypointer/OneBRC/commit/c08cab85d444d44ccf46e2ff15142f97b66eed00][c08cab8]]
 *** Time
 - 50 Million rows: 8.813 seconds
 - Billion rows: 127.065 seconds
@@ -40,6 +40,7 @@ see commit:
 Well I just removed the new allocation of `StationData` if it already existed and just updated the one that was already there. I don't know why I didn't just do this in the first place. Anyway on to the next improvement.
 
 * Resource
-** Version 1: plain buffer reader
+** Version 1: plain buffer reader + hashmap
 - https://doc.rust-lang.org/stable/std/io/struct.BufReader.html#method.buffer
-- https://doc.rust-lang.org/std/string/struct.String.html#method.split_once
+- https://doc.rust-lang.org/std/string/struct.String.html#method.split_once [didnt actually get to use split once]
+- https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.entry

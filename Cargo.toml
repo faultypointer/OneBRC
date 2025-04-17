@@ -7,4 +7,7 @@ edition = "2024"
 name = "create_data"
 path = "scripts/create_data.rs"
 
+[profile.release]
+debug = true
+
 [dependencies]
