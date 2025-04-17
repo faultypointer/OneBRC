@@ -1,0 +1,35 @@
+#+title: Readme
+#+author: faultypointer
+#+date: <2025-04-17 Thu>
+
+* 1 Billion Row Chanllenge
+intro to 1brc ...
+
+* Comparisions
+** Basic with BufReader and HashMap
+*** Time
+- 50 Million rows took somewhere around 9.7-9.9 seconds
+- Full Billon rows took 149.293 seconds
+
+*** Explanation
+Created a BufReader for reading the file. From the std docs "A `BufReader<R>` performs large, infrequent reads on the underlying `Read` and maintains an in-memory buffer of the results."
+
+To store the data, I used a `HashMap<String, StationData>`. The `StationData` is a struct I defined.
+#+begin_src rust
+struct StationData {
+    count: u32,
+    min: f64,
+    max: f64,
+    sum: f64,
+}
+#+end_src
+
+Then for each line read from the buffered reader, I split into station name and the temperature. Using the station name as the key, look into the map. If it is in the map, take the old data out and create the new data using the old data and the newly read temperature.
+(Maybe updating the old data instead of creating a new one improves it). If it is not then we just put a new one.
+
+And then finally to present the data in sorted manner, collect the hashmap into vector and sort the vector using the keys.
+
+* Resource
+** Version 1: plain buffer reader
+- https://doc.rust-lang.org/stable/std/io/struct.BufReader.html#method.buffer
+- https://doc.rust-lang.org/std/string/struct.String.html#method.split_once
