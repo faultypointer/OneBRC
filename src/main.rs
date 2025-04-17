@@ -25,10 +25,13 @@ fn main() {
 
     for line in reader.lines() {
         let line = line.unwrap().to_string();
-        let line_split: Vec<&str> = line.split(';').collect();
-        let station_name = line_split[0].to_owned();
-        let temp: f64 = line_split[1].trim().parse().unwrap();
-        if let Some(data) = station_data.get_mut(line_split[0]) {
+        // When I first tried the split once method, the to_owned or something showed error so I assumed
+        // I couldn't use the split_once method so I went to the split with vector and collect which I saw
+        // in the flamegraph was taking a large portion. anyway this reduces the time by nearly 22 seconds
+        let (station_name, temp) = line.split_once(';').unwrap();
+        let station_name = station_name.to_owned();
+        let temp: f64 = temp.trim().parse().unwrap();
+        if let Some(data) = station_data.get_mut(&station_name) {
             // and it did (maybe I mean I just ran it once for 50M and 1B so who knows and cache and other stuff)
             // but still did
             data.count += 1;

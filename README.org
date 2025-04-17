@@ -39,8 +39,26 @@ see commit: [[https://github.com/faultypointer/OneBRC/commit/c08cab85d444d44ccf4
 *** Explanation
 Well I just removed the new allocation of `StationData` if it already existed and just updated the one that was already there. I don't know why I didn't just do this in the first place. Anyway on to the next improvement.
 
+** Third Attempt: actually using the split_once
+see commit:
+*** Time
+- 50 Million rows: 6.988 seconds
+- Billion rows: 105.545 seconds
+  finally we are getting near other people's first simple attempt
+*** Explanation
+For some reason I used this to split the line
+#+begin_src rust
+let line_split: Vec<&str> = line.split(';').collect();
+#+end_src
+
+instead of just this
+#+begin_src rust
+let (station_name, temp) = line.split_once(';').unwrap();
+#+end_src
+
+So collecting the vector and stuff added to the time.
 * Resource
 ** Version 1: plain buffer reader + hashmap
 - https://doc.rust-lang.org/stable/std/io/struct.BufReader.html#method.buffer
-- https://doc.rust-lang.org/std/string/struct.String.html#method.split_once [didnt actually get to use split once]
+- https://doc.rust-lang.org/std/string/struct.String.html#method.split_once [didnt actually get to use split once] [see third attempt]
 - https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.entry
