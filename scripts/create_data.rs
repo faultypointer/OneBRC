@@ -29,10 +29,10 @@ fn main() {
         fs::create_dir_all(dir_path).unwrap();
     }
 
-    let file = File::create(dir_path.join("weather_stations.csv")).unwrap();
+    let file = File::create(dir_path.join("weather_stations_small.csv")).unwrap();
     let mut writer = BufWriter::new(file);
 
-    let num_entries = 1_000_000_000;
+    let num_entries = 50_000_000;
     for i in 0..num_entries {
         let city = cities[i % cities.len()];
         let temperature = temperatures[i % temperatures.len()];
