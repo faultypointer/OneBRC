@@ -1,0 +1,10 @@
+[package]
+name = "onebrc"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "create_data"
+path = "scripts/create_data.rs"
+
+[dependencies]
