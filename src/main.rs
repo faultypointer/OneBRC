@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     fs::File,
     io::{BufRead, BufReader},
 };
@@ -21,7 +21,8 @@ fn main() {
     };
 
     let reader = BufReader::new(data_file);
-    let mut station_data: HashMap<String, StationData> = HashMap::new();
+    // finally using that BTreeMap and it improved a little
+    let mut station_data: BTreeMap<String, StationData> = BTreeMap::new();
 
     for line in reader.lines() {
         let line = line.unwrap().to_string();
@@ -49,12 +50,8 @@ fn main() {
         }
     }
 
-    // the original problem had way more cities. the script I copied has only 8. so
-    // sorting is really not that expensive I think.
-    let mut v: Vec<_> = station_data.into_iter().collect();
-    v.sort_by(|x, y| x.0.cmp(&y.0));
     print!("{{");
-    for (station, data) in v {
+    for (station, data) in station_data.into_iter() {
         print!(
             "{}={:.1}/{:.1}/{:.1}, ",
             station,
