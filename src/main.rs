@@ -28,15 +28,13 @@ fn main() {
         let line_split: Vec<&str> = line.split(';').collect();
         let station_name = line_split[0].to_owned();
         let temp: f64 = line_split[1].trim().parse().unwrap();
-        if let Some(data) = station_data.get(line_split[0]) {
-            // maybe just updating the previous data would yeild better result than creating a new one
-            let new_data = StationData {
-                count: data.count + 1,
-                min: f64::min(data.min, temp),
-                max: f64::max(data.max, temp),
-                sum: data.sum + temp,
-            };
-            station_data.insert(station_name, new_data);
+        if let Some(data) = station_data.get_mut(line_split[0]) {
+            // and it did (maybe I mean I just ran it once for 50M and 1B so who knows and cache and other stuff)
+            // but still did
+            data.count += 1;
+            data.min = f64::min(data.min, temp);
+            data.max = f64::max(data.max, temp);
+            data.sum += temp;
         } else {
             let data = StationData {
                 count: 1,

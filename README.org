@@ -6,7 +6,8 @@
 intro to 1brc ...
 
 * Comparisions
-** Basic with BufReader and HashMap
+** First Attempt: Basic with BufReader and HashMap
+see commit: [[https://github.com/faultypointer/OneBRC/commit/e660d6d95bacb2826cd1f44e02b53f192bfcc694][e660d6d]]
 *** Time
 - 50 Million rows took somewhere around 9.7-9.9 seconds
 - Full Billon rows took 149.293 seconds
@@ -28,6 +29,15 @@ Then for each line read from the buffered reader, I split into station name and 
 (Maybe updating the old data instead of creating a new one improves it). If it is not then we just put a new one.
 
 And then finally to present the data in sorted manner, collect the hashmap into vector and sort the vector using the keys.
+
+** Second Attempt: First Attempt + No allocaing New data
+see commit:
+*** Time
+- 50 Million rows: 8.813 seconds
+- Billion rows: 127.065 seconds
+
+*** Explanation
+Well I just removed the new allocation of `StationData` if it already existed and just updated the one that was already there. I don't know why I didn't just do this in the first place. Anyway on to the next improvement.
 
 * Resource
 ** Version 1: plain buffer reader
